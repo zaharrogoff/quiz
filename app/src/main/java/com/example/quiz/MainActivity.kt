@@ -68,6 +68,8 @@ fun GeoQuizScreen() {
     // ---------- Состояние ----------
     var currentIndex by rememberSaveable { mutableIntStateOf(0) }
     var isAnswered by rememberSaveable { mutableStateOf(false) }
+    var isCurrentAnswerCorrect by rememberSaveable { mutableStateOf(false) }
+    var correctAnswersCount by rememberSaveable { mutableIntStateOf(0) }
 
     val currentQuestion = questions[currentIndex]
     val isLastQuestion = currentIndex == questions.lastIndex
@@ -76,13 +78,15 @@ fun GeoQuizScreen() {
     fun checkAnswer(userAnswer: Boolean) {
         if (isAnswered) return
         isAnswered = true
-        // Проверка правильности будет добавлена в следующем коммите
+        isCurrentAnswerCorrect = (userAnswer == currentQuestion.answerTrue)
+        if (isCurrentAnswerCorrect) correctAnswersCount++
     }
 
     fun moveToNext() {
         if (isLastQuestion) return
         currentIndex++
         isAnswered = false
+        isCurrentAnswerCorrect = false
     }
 
     // ---------- UI ----------
@@ -137,17 +141,41 @@ fun GeoQuizScreen() {
                     Text("FALSE")
                 }
             }
+        } else {
+            // Показываем результат ответа
+            val resultText = if (isCurrentAnswerCorrect) "✅ Правильно!" else "❌ Неправильно!"
+            val resultColor = if (isCurrentAnswerCorrect)
+                MaterialTheme.colorScheme.primary
+            else
+                MaterialTheme.colorScheme.error
+
+            Text(
+                text = resultText,
+                fontSize = 20.sp,
+                color = resultColor,
+                fontWeight = FontWeight.Bold
+            )
         }
 
         Spacer(Modifier.height(32.dp))
 
-        // Кнопка Next — только после ответа и не на последнем вопросе
+        // Кнопка Next — только после ответа и НЕ на последнем вопросе
         if (isAnswered && !isLastQuestion) {
             Button(
                 onClick = { moveToNext() },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("NEXT")
+            }
+        }
+
+        // На последнем вопросе после ответа — кнопка FINISH
+        if (isAnswered && isLastQuestion) {
+            Button(
+                onClick = { moveToNext() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("FINISH")
             }
         }
     }
