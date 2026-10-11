@@ -67,7 +67,23 @@ fun GeoQuizScreen() {
 
     // ---------- Состояние ----------
     var currentIndex by rememberSaveable { mutableIntStateOf(0) }
+    var isAnswered by rememberSaveable { mutableStateOf(false) }
+
     val currentQuestion = questions[currentIndex]
+    val isLastQuestion = currentIndex == questions.lastIndex
+
+    // ---------- Обработчики ----------
+    fun checkAnswer(userAnswer: Boolean) {
+        if (isAnswered) return
+        isAnswered = true
+        // Проверка правильности будет добавлена в следующем коммите
+    }
+
+    fun moveToNext() {
+        if (isLastQuestion) return
+        currentIndex++
+        isAnswered = false
+    }
 
     // ---------- UI ----------
     Column(
@@ -98,14 +114,41 @@ fun GeoQuizScreen() {
 
         Spacer(Modifier.height(48.dp))
 
-        // Кнопка перехода к следующему вопросу
-        Button(
-            onClick = {
-                if (currentIndex < questions.lastIndex) currentIndex++
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("NEXT")
+        // Кнопки True / False — скрываются после ответа
+        if (!isAnswered) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Button(
+                    onClick = { checkAnswer(true) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp)
+                ) {
+                    Text("TRUE")
+                }
+                Button(
+                    onClick = { checkAnswer(false) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 8.dp)
+                ) {
+                    Text("FALSE")
+                }
+            }
+        }
+
+        Spacer(Modifier.height(32.dp))
+
+        // Кнопка Next — только после ответа и не на последнем вопросе
+        if (isAnswered && !isLastQuestion) {
+            Button(
+                onClick = { moveToNext() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("NEXT")
+            }
         }
     }
 }
