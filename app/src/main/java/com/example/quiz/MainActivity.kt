@@ -7,9 +7,13 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 // ---------- Модель вопроса ----------
 data class Question(
@@ -61,7 +65,11 @@ fun GeoQuizScreen() {
         )
     }
 
-    // ---------- Заглушка ----------
+    // ---------- Состояние ----------
+    var currentIndex by rememberSaveable { mutableIntStateOf(0) }
+    val currentQuestion = questions[currentIndex]
+
+    // ---------- UI ----------
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -69,8 +77,35 @@ fun GeoQuizScreen() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("GeoQuiz — заготовка")
-        Spacer(Modifier.height(8.dp))
-        Text("Вопросов загружено: ${questions.size}")
+
+        // Номер вопроса
+        Text(
+            text = "Вопрос ${currentIndex + 1} из ${questions.size}",
+            fontSize = 16.sp,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        // Текст вопроса
+        Text(
+            text = currentQuestion.text,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Medium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(Modifier.height(48.dp))
+
+        // Кнопка перехода к следующему вопросу
+        Button(
+            onClick = {
+                if (currentIndex < questions.lastIndex) currentIndex++
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("NEXT")
+        }
     }
 }
