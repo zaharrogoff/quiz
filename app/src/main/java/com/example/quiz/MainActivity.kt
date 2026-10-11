@@ -70,6 +70,7 @@ fun GeoQuizScreen() {
     var isAnswered by rememberSaveable { mutableStateOf(false) }
     var isCurrentAnswerCorrect by rememberSaveable { mutableStateOf(false) }
     var correctAnswersCount by rememberSaveable { mutableIntStateOf(0) }
+    var showResultDialog by rememberSaveable { mutableStateOf(false) }
 
     val currentQuestion = questions[currentIndex]
     val isLastQuestion = currentIndex == questions.lastIndex
@@ -83,10 +84,21 @@ fun GeoQuizScreen() {
     }
 
     fun moveToNext() {
-        if (isLastQuestion) return
+        if (isLastQuestion) {
+            showResultDialog = true
+            return
+        }
         currentIndex++
         isAnswered = false
         isCurrentAnswerCorrect = false
+    }
+
+    fun resetQuiz() {
+        currentIndex = 0
+        isAnswered = false
+        isCurrentAnswerCorrect = false
+        correctAnswersCount = 0
+        showResultDialog = false
     }
 
     // ---------- UI ----------
@@ -178,5 +190,38 @@ fun GeoQuizScreen() {
                 Text("FINISH")
             }
         }
+    }
+
+    // ---------- Диалог с результатом ----------
+    if (showResultDialog) {
+        AlertDialog(
+            onDismissRequest = { /* блокируем закрытие тапом вне */ },
+            title = { Text("Тест завершён!") },
+            text = {
+                Column {
+                    Text(
+                        "Правильных ответов: $correctAnswersCount из ${questions.size}",
+                        fontSize = 18.sp
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    val percent = (correctAnswersCount * 100) / questions.size
+                    Text("Результат: $percent%")
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { resetQuiz() }
+                ) {
+                    Text("Пройти заново")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showResultDialog = false }
+                ) {
+                    Text("Закрыть")
+                }
+            }
+        )
     }
 }
